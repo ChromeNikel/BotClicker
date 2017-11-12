@@ -1,17 +1,9 @@
 ﻿using OpenCvSharp;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ScreenMaker
@@ -30,7 +22,7 @@ namespace ScreenMaker
             public int Bottom;
         }
         [DllImport("user32.dll")]
-        private static extern IntPtr ShowWindow(IntPtr hWnd, int nCmdShow);
+        private static extern IntPtr ShowWindow(IntPtr hWnd, int nCmdShow);       
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
                
@@ -65,9 +57,10 @@ namespace ScreenMaker
             cl.ClickUlti(left, top);
             
         }
+
         public Bitmap Catch()
         {
-            this.SendToBack();
+            this.SendToBack();           
             Process[] prArray = Process.GetProcesses();
             int numberOfDragons = 0;
             for (int i = 0; i < prArray.Length; i++)
@@ -80,7 +73,7 @@ namespace ScreenMaker
             IntPtr hWnd = prArray[numberOfDragons].MainWindowHandle;
             SetForegroundWindow(hWnd);
             ShowWindow(hWnd, numberOfDragons);
-            
+            Thread.Sleep(200);
             RECT rct = new RECT();
             GetWindowRect(hWnd, ref rct);
             int width = rct.Right - rct.Left;
@@ -90,18 +83,9 @@ namespace ScreenMaker
             Rectangle rectangle = new Rectangle(rct.Left, rct.Top, width, height);
             Bitmap screen = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             Graphics.FromImage(screen).CopyFromScreen(rct.Left, rct.Top, 0, 0, new System.Drawing.Size(width, height), CopyPixelOperation.SourceCopy);
-            pictureBox1.Image = screen;
+            
             return screen;
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            System.Drawing.Point p = pictureBox1.PointToClient(System.Windows.Forms.Cursor.Position);
-            //Color foncolor = (pictureBox1.Image as Bitmap).GetPixel(p.X, p.Y);
-            //textBox1.Text = foncolor.Name.ToString();
-            textBox1.Text = p.X.ToString();
-            textBox2.Text = p.Y.ToString();
-        }
+        }  
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -121,6 +105,46 @@ namespace ScreenMaker
             Bitmap Bmp = (Bitmap)cannyImage;
             cl = new Clicker(Bmp);
             cl.ClickUlti(left, top);
-        }      
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            timer1.Enabled = true;
+            Bitmap pic = Catch();
+            Bitmap pic0 = new Bitmap(pic.Width, pic.Height);
+            var inimage = OpenCvSharp.Extensions.BitmapConverter.ToMat(pic);
+            var outimage = OpenCvSharp.Extensions.BitmapConverter.ToMat(pic0);
+            OpenCvSharp.Cv2.Canny(inimage, outimage, Convert.ToInt32(0), Convert.ToInt32(255), 3);
+            var cannyImage = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(outimage);
+
+            Application.DoEvents();
+            inimage.Dispose();
+            outimage.Dispose();
+            pic.Dispose();
+            pic0.Dispose();
+
+            Bitmap Bmp = (Bitmap)cannyImage;
+            cl = new Clicker(Bmp);
+            cl.ClickUlti(left, top);
+        }
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Visible = true;
+                this.ShowInTaskbar = true;
+                this.WindowState = FormWindowState.Normal;
+            }
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.ShowInTaskbar = false;
+                this.Visible = false;
+            }
+        }
     }
 }

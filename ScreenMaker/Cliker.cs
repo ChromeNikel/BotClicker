@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace ScreenMaker
@@ -26,7 +23,7 @@ namespace ScreenMaker
         {   ///279, 246, 285, 328, 258
             summaDefoult0 = new int[] {258, 328, 285, 246, 279};
             ///284, 253, 312, 327, 271
-            summaDefoult1 = new int[] {284, 253, 312, 327, 271};
+            summaDefoult1 = new int[] { 271, 327, 312, 253, 284 };
             rectsUltes.Push(new Rectangle(430, 555, 32, 32));
             rectsUltes.Push(new Rectangle(478, 555, 32, 32));
             rectsUltes.Push(new Rectangle(524, 555, 32, 32));
